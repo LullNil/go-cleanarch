@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  migrate:
+    cmds:
+      - task: migrate:up
+    silent: true
+
+  migrate:up:
+    desc: "Apply all UP migrations for PostgreSQL"
+    cmds:
+      - go run ./cmd/migrator --database-dsn "postgres://user:password123@localhost:5437/dbname?sslmode=disable" --migrations-path ./migrations --command up
+
+  migrate:down:
+    desc: "Rollback the last DOWN migration for PostgreSQL"
+    cmds:
+      - go run ./cmd/migrator --database-dsn "postgres://user:password123@localhost:5437/dbname?sslmode=disable" --migrations-path ./migrations --command down
+
+  server:
+    desc: "Run the server"
+    cmds:
+      - go run ./cmd/app/main.go --config=./config/local.yaml

@@ -1,0 +1,6 @@
+CREATE TABLE entity1 (
+    id SERIAL PRIMARY KEY,
+    field1 BOOLEAN NOT NULL,
+    field2 BIGINT NOT NULL,
+    field3 TEXT NOT NULL
+);
