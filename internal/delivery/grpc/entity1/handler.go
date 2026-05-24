@@ -11,8 +11,8 @@ import (
 
 // Service defines the entity1 use cases required by the gRPC handler.
 type Service interface {
-	CreateEntity1(ctx context.Context, req *entity1service.CreateRequest) (int64, error)
-	UpdateEntity1(ctx context.Context, req *entity1service.UpdateRequest) error
+	CreateEntity1(ctx context.Context, cmd *entity1service.CreateCommand) (int64, error)
+	UpdateEntity1(ctx context.Context, cmd *entity1service.UpdateCommand) error
 	GetEntity1Details(ctx context.Context, id int64) (*domainentity1.Entity1, error)
 	DeleteEntity1(ctx context.Context, id int64) error
 }
@@ -33,7 +33,7 @@ func NewHandler(service Service) *Handler {
 
 // CreateEntity1 creates a new entity1.
 func (h *Handler) CreateEntity1(ctx context.Context, req *pb.CreateEntity1Request) (*pb.CreateEntity1Response, error) {
-	id, err := h.service.CreateEntity1(ctx, &entity1service.CreateRequest{
+	id, err := h.service.CreateEntity1(ctx, &entity1service.CreateCommand{
 		Field1: req.GetField1(),
 		Field2: req.GetField2(),
 		Field3: req.GetField3(),
@@ -47,7 +47,7 @@ func (h *Handler) CreateEntity1(ctx context.Context, req *pb.CreateEntity1Reques
 
 // UpdateEntity1 updates an existing entity1.
 func (h *Handler) UpdateEntity1(ctx context.Context, req *pb.UpdateEntity1Request) (*pb.UpdateEntity1Response, error) {
-	if err := h.service.UpdateEntity1(ctx, &entity1service.UpdateRequest{
+	if err := h.service.UpdateEntity1(ctx, &entity1service.UpdateCommand{
 		ID:     req.GetId(),
 		Field3: req.GetField3(),
 	}); err != nil {

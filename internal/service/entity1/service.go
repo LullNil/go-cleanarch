@@ -20,17 +20,17 @@ func New(repo domainentity1.Repository) *Service {
 }
 
 // CreateEntity1 creates a new entity1.
-func (s *Service) CreateEntity1(ctx context.Context, req *CreateRequest) (int64, error) {
+func (s *Service) CreateEntity1(ctx context.Context, cmd *CreateCommand) (int64, error) {
 	const op = "service.entity1.CreateEntity1"
 
-	if req == nil || strings.TrimSpace(req.Field3) == "" {
+	if cmd == nil || strings.TrimSpace(cmd.Field3) == "" {
 		return 0, fmt.Errorf("%s: %w", op, domain.ErrInvalidInput)
 	}
 
 	e := &domainentity1.Entity1{
-		Field1: req.Field1,
-		Field2: req.Field2,
-		Field3: req.Field3,
+		Field1: cmd.Field1,
+		Field2: cmd.Field2,
+		Field3: cmd.Field3,
 	}
 
 	id, err := s.repo.Save(ctx, e)
@@ -42,19 +42,19 @@ func (s *Service) CreateEntity1(ctx context.Context, req *CreateRequest) (int64,
 }
 
 // UpdateEntity1 updates an existing entity1.
-func (s *Service) UpdateEntity1(ctx context.Context, req *UpdateRequest) error {
+func (s *Service) UpdateEntity1(ctx context.Context, cmd *UpdateCommand) error {
 	const op = "service.entity1.UpdateEntity1"
 
-	if req == nil || req.ID <= 0 || strings.TrimSpace(req.Field3) == "" {
+	if cmd == nil || cmd.ID <= 0 || strings.TrimSpace(cmd.Field3) == "" {
 		return fmt.Errorf("%s: %w", op, domain.ErrInvalidInput)
 	}
 
-	e, err := s.repo.GetByID(ctx, req.ID)
+	e, err := s.repo.GetByID(ctx, cmd.ID)
 	if err != nil {
 		return fmt.Errorf("%s: failed to get entity1: %w", op, err)
 	}
 
-	e.Field3 = req.Field3
+	e.Field3 = cmd.Field3
 	if err := s.repo.Update(ctx, e); err != nil {
 		return fmt.Errorf("%s: failed to update entity1: %w", op, err)
 	}

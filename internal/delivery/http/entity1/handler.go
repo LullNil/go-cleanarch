@@ -13,8 +13,8 @@ import (
 )
 
 type Service interface {
-	CreateEntity1(ctx context.Context, req *entity1service.CreateRequest) (int64, error)
-	UpdateEntity1(ctx context.Context, req *entity1service.UpdateRequest) error
+	CreateEntity1(ctx context.Context, cmd *entity1service.CreateCommand) (int64, error)
+	UpdateEntity1(ctx context.Context, cmd *entity1service.UpdateCommand) error
 	GetEntity1Details(ctx context.Context, id int64) (*entity1.Entity1, error)
 	DeleteEntity1(ctx context.Context, id int64) error
 }
@@ -40,7 +40,7 @@ func (h *Handler) CreateEntity1(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.service.CreateEntity1(r.Context(), &entity1service.CreateRequest{
+	id, err := h.service.CreateEntity1(r.Context(), &entity1service.CreateCommand{
 		Field1: req.Field1,
 		Field2: req.Field2,
 		Field3: req.Field3,
@@ -66,7 +66,7 @@ func (h *Handler) UpdateEntity1(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.UpdateEntity1(r.Context(), &entity1service.UpdateRequest{
+	if err := h.service.UpdateEntity1(r.Context(), &entity1service.UpdateCommand{
 		ID:     id,
 		Field3: req.Field3,
 	}); err != nil {
