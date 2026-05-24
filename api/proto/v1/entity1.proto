@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package api.proto.v1;
+
+option go_package = "github.com/LullNil/go-cleanarch/internal/delivery/grpc/pb;pb";
+
+service Entity1Service {
+  rpc CreateEntity1(CreateEntity1Request) returns (CreateEntity1Response);
+  rpc UpdateEntity1(UpdateEntity1Request) returns (UpdateEntity1Response);
+  rpc GetEntity1Details(GetEntity1DetailsRequest) returns (GetEntity1DetailsResponse);
+  rpc DeleteEntity1(DeleteEntity1Request) returns (DeleteEntity1Response);
+}
+
+message CreateEntity1Request {
+  bool field1 = 1;
+  int64 field2 = 2;
+  string field3 = 3;
+}
+
+message CreateEntity1Response {
+  int64 id = 1;
+}
+
+message UpdateEntity1Request {
+  int64 id = 1;
+  string field3 = 2;
+}
+
+message UpdateEntity1Response {
+  string status = 1;
+}
+
+message GetEntity1DetailsRequest {
+  int64 id = 1;
+}
+
+message GetEntity1DetailsResponse {
+  int64 id = 1;
+  bool field1 = 2;
+  int64 field2 = 3;
+  string field3 = 4;
+}
+
+message DeleteEntity1Request {
+  int64 id = 1;
+}
+
+message DeleteEntity1Response {
+  string status = 1;
+}

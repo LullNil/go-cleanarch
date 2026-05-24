@@ -13,14 +13,20 @@ import (
 type Config struct {
 	Env        string     `yaml:"env"`
 	HTTPServer HTTPServer `yaml:"http_server"`
+	GRPCServer GRPCServer `yaml:"grpc_server"`
 	Postgres   Postgres   `yaml:"postgres"`
 }
 
 // HTTPServer contains HTTP server configuration.
 type HTTPServer struct {
-	Port         string        `yaml:"port"`
+	Port         string        `yaml:"port" env-default:":8080"`
 	ReadTimeout  time.Duration `yaml:"read_timeout"`
 	WriteTimeout time.Duration `yaml:"write_timeout"`
+}
+
+// GRPCServer contains gRPC server configuration.
+type GRPCServer struct {
+	Port string `yaml:"port" env-default:":9090"`
 }
 
 // Postgres contains PostgreSQL configuration.

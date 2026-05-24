@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/LullNil/go-cleanarch/config"
+	grpcserver "github.com/LullNil/go-cleanarch/internal/delivery/grpc"
 	httpserver "github.com/LullNil/go-cleanarch/internal/delivery/http"
 	"github.com/LullNil/go-cleanarch/internal/lib/logger"
 )
@@ -18,7 +19,8 @@ type App struct {
 	log      *slog.Logger
 	modules  *Modules
 	services *Services
-	server   *httpserver.Server
+	http     *httpserver.Server
+	grpc     *grpcserver.Server
 }
 
 // Run is the entrypoint of the application.
@@ -44,14 +46,15 @@ func newApp(cfg *config.Config) (*App, error) {
 	// Services
 	services := initServices(modules)
 
-	// HTTP server
-	server := httpserver.NewServer(cfg.HTTPServer, log, services.Entity1)
+	httpServer := httpserver.NewServer(cfg.HTTPServer, log, services.Entity1)
+	grpcServer := grpcserver.NewServer(cfg.GRPCServer, log, services.Entity1)
 
 	return &App{
 		log:      log,
 		modules:  modules,
 		services: services,
-		server:   server,
+		http:     httpServer,
+		grpc:     grpcServer,
 	}, nil
 }
 
@@ -60,11 +63,18 @@ func (a *App) run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2)
 
 	// Start the HTTP server
 	go func() {
-		if err := a.server.Run(); err != nil {
+		if err := a.http.Run(); err != nil {
+			errCh <- err
+		}
+	}()
+
+	// Start the gRPC server
+	go func() {
+		if err := a.grpc.Run(); err != nil {
 			errCh <- err
 		}
 	}()
@@ -80,10 +90,16 @@ func (a *App) run() error {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := a.server.Shutdown(shutdownCtx); err != nil {
+	if err := a.http.Shutdown(shutdownCtx); err != nil {
 		a.log.Error("failed to gracefully shutdown http server", slog.String("error", err.Error()))
 	} else {
 		a.log.Info("http server stopped gracefully")
+	}
+
+	if err := a.grpc.Shutdown(shutdownCtx); err != nil {
+		a.log.Error("failed to gracefully shutdown grpc server", slog.String("error", err.Error()))
+	} else {
+		a.log.Info("grpc server stopped gracefully")
 	}
 
 	// Close external modules
