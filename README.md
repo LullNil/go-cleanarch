@@ -1,96 +1,112 @@
-
----
-
 # Go Clean Architecture Template
 
-A minimal and extensible Go backend template following the principles of **Clean Architecture**.
-It separates application layers to improve testability, scalability, and maintainability.
-
-## Overview
-
-The project is organized into a `server` directory, which contains all backend-related code.
-Each domain entity (e.g. `entity1`) has its own folder with separate `entity`, `repository`, and `service` layers.
-
-## Getting Started
-
-```bash
-# Start dependencies (PostgreSQL)
-docker-compose up -d
-
-# Run migrations
-task migrate:up
-
-# Start application
-task server
-```
+A minimal and extensible Go backend template following the principles of Clean Architecture.
+It separates domain models, use cases, delivery adapters, and infrastructure adapters while keeping the project small enough to extend without ceremony.
 
 ## Features
 
-* Layered structure with clear boundaries (domain, service, repository, delivery)
-* Config-driven application setup
-* PostgreSQL integration via `docker-compose`
-* Taskfile for simplified local development
-* Migration support via `cmd/migrator`
+- Clean dependency direction: delivery and infrastructure depend inward, domain stays independent.
+- Domain-first repository ports per entity.
+- Concrete application services with consumer-side interfaces in adapters.
+- HTTP DTOs isolated in delivery packages.
+- PostgreSQL repository example with migrations.
+- Versioned REST routes under `/v1`.
+- Taskfile for local development.
 
 ## Structure
 
-```bash
+```text
 .
-├── server
-    ├── README.md              # Server-specific documentation
-    ├── Taskfile.yaml          # Task definitions for development
-    ├── cmd                    # Application entry points
-    │   ├── app
-    │   │   └── main.go        # Main application entry
-    │   └── migrator
-    │       └── main.go        # Database migration tool
-    ├── config
-    │   ├── config.go          # Configuration loader
-    │   └── local.yaml         # Local environment configuration
-    ├── docker-compose.yml     # Local development services (DB, etc.)
-    ├── domain
-    │   └── entity1
-    │       ├── entity.go      # Domain model
-    │       ├── repository.go  # Repository interface
-    │       └── service.go     # Domain service logic
-    ├── internal
-    │   ├── app
-    │   │   ├── app.go         # Application initialization
-    │   │   ├── modules.go     # Dependency wiring
-    │   │   ├── router.go      # HTTP routing setup
-    │   │   └── services.go    # Service initialization
-    │   ├── delivery
-    │   │   └── http
-    │   │       └── entity1
-    │   │           └── handler.go  # HTTP handler for entity1
-    │   ├── lib
-    │   │   └── logger
-    │   │       └── pretty.go   # Pretty-printed structured logging
-    │   ├── repository
-    │   │   ├── postgres
-    │   │   │   ├── entity1_repository.go  # PostgreSQL implementation
-    │   │   │   └── postgres.go            # DB connection setup
-    │   │   └── repository.go  # Common repository interfaces
-    │   └── service
-    │       └── entity1
-    │           └── service.go  # Service implementation
-    └── migrations
-        ├── 1_create_entity1_table.up.sql
-        └── 1_drop_entity1_table.down.sql
+├── cmd
+│   ├── app                 # HTTP application entry point
+│   └── migrator            # Database migration CLI
+├── config                  # Configuration loading and local config
+├── domain
+│   ├── errors.go           # Shared domain errors
+│   └── entity1
+│       ├── entity.go       # Business entity
+│       └── repository.go   # Repository port for this domain
+├── internal
+│   ├── app                 # Composition root, modules, router
+│   ├── delivery
+│   │   └── http            # HTTP handlers and transport DTOs
+│   ├── lib                 # Shared internal helpers
+│   ├── repository          # Infrastructure adapters
+│   └── service             # Use cases / application services
+├── migrations
+├── docker-compose.yml
+├── go.mod
+└── Taskfile.yaml
 ```
 
-## TODO
+## Requirements
 
-- [ ] Add gRPC examples under `internal/delivery/grpc/`
-- [ ] Add Redis repository example (caching, sessions, etc.)
-- [ ] Add Kafka producer/consumer examples in `internal/repository/`
-- [ ] Add Prometheus metrics and health endpoints
-- [ ] Add unit and integration tests for core modules
-- [ ] Add CI/CD workflow example using GitHub Actions
+- Go 1.25+
+- Docker Engine and Docker Compose
+- Optional: Taskfile
 
+## Configuration
+
+Local config lives in `config/local.yaml`:
+
+```yaml
+env: "local"
+
+http_server:
+  port: ":8080"
+  read_timeout: 30s
+  write_timeout: 30s
+
+postgres:
+  dsn: "postgres://user:password123@localhost:5437/dbname?sslmode=disable"
+  max_retries: 10
+  retry_interval: 5s
+  connect_timeout: 30s
+```
+
+You can pass a custom config path with:
+
+```bash
+go run ./cmd/app --config=./config/local.yaml
+```
+
+or set:
+
+```bash
+CONFIG_PATH=./config/local.yaml go run ./cmd/app
+```
+
+## Run Locally
+
+```bash
+docker compose up -d
+task migrate:up
+task server
+```
+
+Without Taskfile:
+
+```bash
+go run ./cmd/migrator --database-dsn "postgres://user:password123@localhost:5437/dbname?sslmode=disable" --migrations-path ./migrations --command up
+go run ./cmd/app --config=./config/local.yaml
+```
+
+## Example Routes
+
+```text
+POST   /v1/entity1
+GET    /v1/entity1/{id}
+PUT    /v1/entity1/{id}
+DELETE /v1/entity1/{id}
+```
+
+## Notes
+
+- Keep domain packages focused on entities, domain-specific errors, and repository ports.
+- Keep transport DTOs in delivery adapters such as `internal/delivery/http`.
+- Prefer concrete services and define small consumer-side interfaces where adapters need them.
+- Add new infrastructure implementations under `internal/repository/<driver>`.
 
 ## License
 
 This project is licensed under the [MIT License](./LICENSE).
-
----

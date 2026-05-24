@@ -20,7 +20,7 @@ type App struct {
 	server   *http.Server
 }
 
-// Run - entrypoint of the application.
+// Run is the entrypoint of the application.
 func Run(cfg *config.Config) error {
 	app, err := newApp(cfg)
 	if err != nil {
@@ -29,7 +29,7 @@ func Run(cfg *config.Config) error {
 	return app.run()
 }
 
-// newApp adjusts all dependencies.
+// newApp adjusts all dependencies
 func newApp(cfg *config.Config) (*App, error) {
 	log := setupLogger(cfg.Env)
 	log.Info("initializing application...")
@@ -60,7 +60,7 @@ func newApp(cfg *config.Config) (*App, error) {
 	}, nil
 }
 
-// run starts all processes and performs graceful shutdown.
+// run starts all processes and performs graceful shutdown
 func (a *App) run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -97,7 +97,7 @@ func (a *App) run() error {
 	return nil
 }
 
-// setupLogger configures the logger based on the environment.
+// setupLogger configures the logger based on the environment
 func setupLogger(env string) *slog.Logger {
 	switch env {
 	case "local":

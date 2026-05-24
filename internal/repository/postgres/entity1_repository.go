@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/LullNil/go-cleanarch/domain"
 	"github.com/LullNil/go-cleanarch/domain/entity1"
-	"github.com/LullNil/go-cleanarch/internal/repository"
 
 	"github.com/lib/pq"
 )
@@ -43,7 +43,7 @@ func (r *entity1Repo) Save(ctx context.Context, e *entity1.Entity1) (int64, erro
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" { // unique_violation
-				return 0, repository.ErrConflict
+				return 0, domain.ErrConflict
 			}
 		}
 		return 0, fmt.Errorf("%s: %w", op, err)
@@ -71,7 +71,7 @@ func (r *entity1Repo) GetByID(ctx context.Context, id int64) (*entity1.Entity1, 
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, repository.ErrNotFound
+			return nil, domain.ErrNotFound
 		}
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -104,7 +104,29 @@ func (r *entity1Repo) Update(ctx context.Context, e *entity1.Entity1) error {
 		return fmt.Errorf("%s: failed to check affected rows: %w", op, err)
 	}
 	if rows == 0 {
-		return repository.ErrNotFound
+		return domain.ErrNotFound
+	}
+
+	return nil
+}
+
+// Delete deletes an Entity1 by its ID.
+func (r *entity1Repo) Delete(ctx context.Context, id int64) error {
+	const op = "repository.postgres.entity1.Delete"
+
+	query := `DELETE FROM entity1 WHERE id = $1`
+
+	res, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("%s: failed to check affected rows: %w", op, err)
+	}
+	if rows == 0 {
+		return domain.ErrNotFound
 	}
 
 	return nil

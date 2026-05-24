@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -9,6 +10,14 @@ import (
 )
 
 func main() {
+	var configPath string
+	flag.StringVar(&configPath, "config", "", "path to config file")
+	flag.Parse()
+
+	if configPath != "" {
+		_ = os.Setenv("CONFIG_PATH", configPath)
+	}
+
 	// Init config
 	cfg, err := config.New()
 	if err != nil {

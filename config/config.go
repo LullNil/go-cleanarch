@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"time"
 
@@ -37,20 +37,16 @@ func New() (*Config, error) {
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		configPath = "config/local.yaml"
-		log.Println("CONFIG_PATH not set, using default:", configPath)
 	}
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatalf("config file not found: %s", configPath)
+	if _, err := os.Stat(configPath); err != nil {
+		return nil, fmt.Errorf("config file not available %q: %w", configPath, err)
 	}
 
 	// Read config from YAML
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config: %s", err)
+		return nil, fmt.Errorf("read config %q: %w", configPath, err)
 	}
-
-	// Log config
-	log.Printf("loaded config from %s\n", configPath)
 
 	return &cfg, nil
 }

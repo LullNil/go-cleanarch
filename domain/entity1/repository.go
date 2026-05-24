@@ -16,8 +16,13 @@ type Updater interface {
 	Update(ctx context.Context, e *Entity1) error
 }
 
+type Deleter interface {
+	Delete(ctx context.Context, id int64) error
+}
+
 type Repository interface {
 	Saver
 	Getter
 	Updater
+	Deleter
 }

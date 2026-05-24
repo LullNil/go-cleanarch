@@ -39,11 +39,13 @@ func initRouter(log *slog.Logger, services *Services) http.Handler {
 	entity1Handler := entity1http.NewHandler(services.Entity1, log)
 
 	// Routes
-	r.Route("/entity1", func(r chi.Router) {
-		r.Post("/create", entity1Handler.CreateEntity1)
-		r.Put("/update", entity1Handler.UpdateEntity1)
-		r.Get("/get", entity1Handler.GetEntity1Details)
-		r.Delete("/delete", entity1Handler.DeleteEntity1)
+	r.Route("/v1", func(r chi.Router) {
+		r.Route("/entity1", func(r chi.Router) {
+			r.Post("/", entity1Handler.CreateEntity1)
+			r.Get("/{id}", entity1Handler.GetEntity1Details)
+			r.Put("/{id}", entity1Handler.UpdateEntity1)
+			r.Delete("/{id}", entity1Handler.DeleteEntity1)
+		})
 	})
 
 	return r
