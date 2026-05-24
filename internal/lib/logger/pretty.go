@@ -10,11 +10,13 @@ import (
 	"github.com/fatih/color"
 )
 
+// PrettyHandler renders slog records in a human-readable format.
 type PrettyHandler struct {
 	writer io.Writer
 	level  slog.Level
 }
 
+// NewPrettyHandler creates a pretty slog handler.
 func NewPrettyHandler(w io.Writer, level slog.Level) *PrettyHandler {
 	return &PrettyHandler{
 		writer: w,
@@ -22,10 +24,12 @@ func NewPrettyHandler(w io.Writer, level slog.Level) *PrettyHandler {
 	}
 }
 
+// Enabled reports whether the handler accepts the given level.
 func (h *PrettyHandler) Enabled(_ context.Context, lvl slog.Level) bool {
 	return lvl >= h.level
 }
 
+// Handle writes a slog record.
 func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	var b strings.Builder
 
@@ -66,10 +70,12 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	return err
 }
 
+// WithAttrs returns a handler with additional attributes.
 func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return h // ignoring for simplicity
 }
 
+// WithGroup returns a handler with an additional group.
 func (h *PrettyHandler) WithGroup(name string) slog.Handler {
 	return h // ignoring for simplicity
 }

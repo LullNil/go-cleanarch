@@ -13,6 +13,7 @@ import (
 	"github.com/LullNil/go-cleanarch/internal/lib/logger"
 )
 
+// App contains application dependencies and lifecycle.
 type App struct {
 	log      *slog.Logger
 	modules  *Modules

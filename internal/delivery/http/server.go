@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
+// Server wraps the HTTP server lifecycle.
 type Server struct {
 	log    *slog.Logger
 	server *stdhttp.Server

@@ -1,5 +1,6 @@
 package entity1
 
+// Entity1 is an example domain entity.
 type Entity1 struct {
 	ID     int64  `json:"id"`
 	Field1 bool   `json:"field1"`

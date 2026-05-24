@@ -9,18 +9,21 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Config contains application configuration.
 type Config struct {
 	Env        string     `yaml:"env"`
 	HTTPServer HTTPServer `yaml:"http_server"`
 	Postgres   Postgres   `yaml:"postgres"`
 }
 
+// HTTPServer contains HTTP server configuration.
 type HTTPServer struct {
 	Port         string        `yaml:"port"`
 	ReadTimeout  time.Duration `yaml:"read_timeout"`
 	WriteTimeout time.Duration `yaml:"write_timeout"`
 }
 
+// Postgres contains PostgreSQL configuration.
 type Postgres struct {
 	DSN            string        `yaml:"dsn"`
 	MaxRetries     int           `yaml:"max_retries" env-default:"10"`

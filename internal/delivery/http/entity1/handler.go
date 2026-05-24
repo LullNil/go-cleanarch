@@ -3,17 +3,13 @@ package entity1
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"log/slog"
 	"net/http"
-	"strconv"
 
-	"github.com/LullNil/go-cleanarch/domain"
 	"github.com/LullNil/go-cleanarch/domain/entity1"
+	"github.com/LullNil/go-cleanarch/internal/delivery/http/httperror"
 	"github.com/LullNil/go-cleanarch/internal/lib/httputil"
 	entity1service "github.com/LullNil/go-cleanarch/internal/service/entity1"
-
-	"github.com/go-chi/chi"
 )
 
 type Service interface {
@@ -40,13 +36,17 @@ func NewHandler(service Service, log *slog.Logger) *Handler {
 func (h *Handler) CreateEntity1(w http.ResponseWriter, r *http.Request) {
 	var req createRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		httputil.WriteError(w, h.log, "invalid request body", err, http.StatusBadRequest)
+		httputil.WriteRequestError(w, r, h.log, "invalid request body", err, http.StatusBadRequest)
 		return
 	}
 
-	id, err := h.service.CreateEntity1(r.Context(), req.toServiceRequest())
+	id, err := h.service.CreateEntity1(r.Context(), &entity1service.CreateRequest{
+		Field1: req.Field1,
+		Field2: req.Field2,
+		Field3: req.Field3,
+	})
 	if err != nil {
-		httputil.WriteError(w, h.log, messageFromError(err), err, statusFromError(err))
+		httputil.WriteRequestError(w, r, h.log, httperror.Message(err), err, httperror.StatusCode(err))
 		return
 	}
 
@@ -55,19 +55,22 @@ func (h *Handler) CreateEntity1(w http.ResponseWriter, r *http.Request) {
 
 // UpdateEntity1 updates an existing entity1.
 func (h *Handler) UpdateEntity1(w http.ResponseWriter, r *http.Request) {
-	id, ok := parseID(w, r, h.log)
+	id, ok := httputil.PathInt64(w, r, h.log, "id")
 	if !ok {
 		return
 	}
 
 	var req updateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		httputil.WriteError(w, h.log, "invalid request body", err, http.StatusBadRequest)
+		httputil.WriteRequestError(w, r, h.log, "invalid request body", err, http.StatusBadRequest)
 		return
 	}
 
-	if err := h.service.UpdateEntity1(r.Context(), req.toServiceRequest(id)); err != nil {
-		httputil.WriteError(w, h.log, messageFromError(err), err, statusFromError(err))
+	if err := h.service.UpdateEntity1(r.Context(), &entity1service.UpdateRequest{
+		ID:     id,
+		Field3: req.Field3,
+	}); err != nil {
+		httputil.WriteRequestError(w, r, h.log, httperror.Message(err), err, httperror.StatusCode(err))
 		return
 	}
 
@@ -76,73 +79,31 @@ func (h *Handler) UpdateEntity1(w http.ResponseWriter, r *http.Request) {
 
 // GetEntity1Details gets entity1 details by ID.
 func (h *Handler) GetEntity1Details(w http.ResponseWriter, r *http.Request) {
-	id, ok := parseID(w, r, h.log)
+	id, ok := httputil.PathInt64(w, r, h.log, "id")
 	if !ok {
 		return
 	}
 
 	entity, err := h.service.GetEntity1Details(r.Context(), id)
 	if err != nil {
-		httputil.WriteError(w, h.log, messageFromError(err), err, statusFromError(err))
+		httputil.WriteRequestError(w, r, h.log, httperror.Message(err), err, httperror.StatusCode(err))
 		return
 	}
 
-	httputil.WriteJSON(w, http.StatusOK, toGetResponse(entity))
+	httputil.WriteJSON(w, http.StatusOK, newGetResponse(entity))
 }
 
 // DeleteEntity1 deletes an entity1 by ID.
 func (h *Handler) DeleteEntity1(w http.ResponseWriter, r *http.Request) {
-	id, ok := parseID(w, r, h.log)
+	id, ok := httputil.PathInt64(w, r, h.log, "id")
 	if !ok {
 		return
 	}
 
 	if err := h.service.DeleteEntity1(r.Context(), id); err != nil {
-		httputil.WriteError(w, h.log, messageFromError(err), err, statusFromError(err))
+		httputil.WriteRequestError(w, r, h.log, httperror.Message(err), err, httperror.StatusCode(err))
 		return
 	}
 
 	httputil.WriteJSON(w, http.StatusOK, &deleteResponse{Status: "deleted"})
-}
-
-func parseID(w http.ResponseWriter, r *http.Request, log *slog.Logger) (int64, bool) {
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
-		httputil.WriteError(w, log, "invalid path parameter", domain.ErrInvalidInput, http.StatusBadRequest)
-		return 0, false
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		httputil.WriteError(w, log, "invalid path parameter", err, http.StatusBadRequest)
-		return 0, false
-	}
-
-	return id, true
-}
-
-func statusFromError(err error) int {
-	switch {
-	case errors.Is(err, domain.ErrNotFound):
-		return http.StatusNotFound
-	case errors.Is(err, domain.ErrAlreadyExists):
-		return http.StatusConflict
-	case errors.Is(err, domain.ErrInvalidInput):
-		return http.StatusBadRequest
-	default:
-		return http.StatusInternalServerError
-	}
-}
-
-func messageFromError(err error) string {
-	switch {
-	case errors.Is(err, domain.ErrInvalidInput):
-		return "invalid request"
-	case errors.Is(err, domain.ErrNotFound):
-		return "resource not found"
-	case errors.Is(err, domain.ErrAlreadyExists):
-		return "resource already exists"
-	default:
-		return "internal server error"
-	}
 }

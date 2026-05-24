@@ -9,6 +9,7 @@ import (
 	"github.com/LullNil/go-cleanarch/internal/repository/postgres"
 )
 
+// Modules contains external resources used by the application.
 type Modules struct {
 	DB *sql.DB
 	// Redis *redis.Client

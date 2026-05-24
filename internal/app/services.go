@@ -5,6 +5,7 @@ import (
 	entity1service "github.com/LullNil/go-cleanarch/internal/service/entity1"
 )
 
+// Services contains application use case services.
 type Services struct {
 	Entity1 *entity1service.Service
 }

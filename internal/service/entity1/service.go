@@ -9,6 +9,7 @@ import (
 	domainentity1 "github.com/LullNil/go-cleanarch/domain/entity1"
 )
 
+// Service implements entity1 use cases.
 type Service struct {
 	repo domainentity1.Repository
 }
