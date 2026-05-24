@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/LullNil/go-cleanarch/config"
 	grpcserver "github.com/LullNil/go-cleanarch/internal/delivery/grpc"
@@ -16,6 +15,7 @@ import (
 
 // App contains application dependencies and lifecycle.
 type App struct {
+	cfg      *config.Config
 	log      *slog.Logger
 	modules  *Modules
 	services *Services
@@ -50,6 +50,7 @@ func newApp(cfg *config.Config) (*App, error) {
 	grpcServer := grpcserver.NewServer(cfg.GRPCServer, log, services.Entity1)
 
 	return &App{
+		cfg:      cfg,
 		log:      log,
 		modules:  modules,
 		services: services,
@@ -87,7 +88,7 @@ func (a *App) run() error {
 	}
 
 	// Stop the HTTP server
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), a.cfg.ShutdownTimeout)
 	defer cancel()
 
 	if err := a.http.Shutdown(shutdownCtx); err != nil {

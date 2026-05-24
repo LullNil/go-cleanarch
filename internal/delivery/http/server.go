@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	stdhttp "net/http"
+	"time"
 
 	"github.com/LullNil/go-cleanarch/config"
 	entity1http "github.com/LullNil/go-cleanarch/internal/delivery/http/entity1"
@@ -55,22 +56,7 @@ func newRouter(cfg config.HTTPServer, log *slog.Logger, entity1Service entity1ht
 	r.Use(chimiddleware.RequestID)
 	r.Use(chimiddleware.RealIP)
 	r.Use(chimiddleware.Recoverer)
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		AllowedMethods: []string{
-			stdhttp.MethodGet,
-			stdhttp.MethodPost,
-			stdhttp.MethodPatch,
-			stdhttp.MethodPut,
-			stdhttp.MethodDelete,
-			stdhttp.MethodOptions,
-		},
-		AllowedHeaders: []string{
-			"Content-Type",
-			"Authorization",
-		},
-	}).Handler)
+	r.Use(cors.New(corsOptions(cfg.CORS)).Handler)
 
 	entity1Handler := entity1http.NewHandler(entity1Service, log)
 
@@ -88,4 +74,37 @@ func newRouter(cfg config.HTTPServer, log *slog.Logger, entity1Service entity1ht
 	}
 
 	return r
+}
+
+func corsOptions(cfg config.CORS) cors.Options {
+	if len(cfg.AllowedOrigins) == 0 {
+		cfg.AllowedOrigins = []string{"*"}
+	}
+	if len(cfg.AllowedMethods) == 0 {
+		cfg.AllowedMethods = []string{
+			stdhttp.MethodGet,
+			stdhttp.MethodPost,
+			stdhttp.MethodPatch,
+			stdhttp.MethodPut,
+			stdhttp.MethodDelete,
+			stdhttp.MethodOptions,
+		}
+	}
+	if len(cfg.AllowedHeaders) == 0 {
+		cfg.AllowedHeaders = []string{
+			"Content-Type",
+			"Authorization",
+		}
+	}
+	if cfg.MaxAge == 0 {
+		cfg.MaxAge = 5 * time.Minute
+	}
+
+	return cors.Options{
+		AllowedOrigins:   cfg.AllowedOrigins,
+		AllowedMethods:   cfg.AllowedMethods,
+		AllowedHeaders:   cfg.AllowedHeaders,
+		AllowCredentials: cfg.AllowCredentials,
+		MaxAge:           int(cfg.MaxAge.Seconds()),
+	}
 }

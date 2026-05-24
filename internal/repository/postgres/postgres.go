@@ -12,7 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// ConnectToDBWithRetries tries to connect to the database with retries.
+// ConnectWithRetries tries to connect to PostgreSQL with retries.
 func ConnectWithRetries(ctx context.Context, pgConfig config.Postgres, log *slog.Logger) (*sql.DB, error) {
 	const op = "postgres.ConnectToDBWithRetries"
 
@@ -35,6 +35,7 @@ func ConnectWithRetries(ctx context.Context, pgConfig config.Postgres, log *slog
 				time.Sleep(pgConfig.RetryInterval)
 				continue
 			}
+			applyPoolSettings(db, pgConfig)
 
 			// Check database connection
 			pingCtx, pingCancel := context.WithTimeout(ctx, pgConfig.RetryInterval)
@@ -55,4 +56,11 @@ func ConnectWithRetries(ctx context.Context, pgConfig config.Postgres, log *slog
 	}
 
 	return nil, fmt.Errorf("%s: failed to connect to PostgreSQL after %d retries and %s timeout: %w", op, pgConfig.MaxRetries, pgConfig.ConnectTimeout, err)
+}
+
+func applyPoolSettings(db *sql.DB, cfg config.Postgres) {
+	db.SetMaxOpenConns(cfg.MaxOpenConns)
+	db.SetMaxIdleConns(cfg.MaxIdleConns)
+	db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
+	db.SetConnMaxIdleTime(cfg.ConnMaxIdleTime)
 }

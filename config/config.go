@@ -11,11 +11,12 @@ import (
 
 // Config contains application configuration.
 type Config struct {
-	Env        string     `yaml:"env"`
-	HTTPServer HTTPServer `yaml:"http_server"`
-	GRPCServer GRPCServer `yaml:"grpc_server"`
-	Postgres   Postgres   `yaml:"postgres"`
-	Redis      Redis      `yaml:"redis"`
+	Env             string        `yaml:"env"`
+	ShutdownTimeout time.Duration `yaml:"shutdown_timeout" env-default:"10s"`
+	HTTPServer      HTTPServer    `yaml:"http_server"`
+	GRPCServer      GRPCServer    `yaml:"grpc_server"`
+	Postgres        Postgres      `yaml:"postgres"`
+	Redis           Redis         `yaml:"redis"`
 }
 
 // HTTPServer contains HTTP server configuration.
@@ -24,6 +25,16 @@ type HTTPServer struct {
 	ReadTimeout   time.Duration `yaml:"read_timeout"`
 	WriteTimeout  time.Duration `yaml:"write_timeout"`
 	EnableSwagger bool          `yaml:"enable_swagger"`
+	CORS          CORS          `yaml:"cors"`
+}
+
+// CORS contains HTTP CORS configuration.
+type CORS struct {
+	AllowedOrigins   []string      `yaml:"allowed_origins"`
+	AllowedMethods   []string      `yaml:"allowed_methods"`
+	AllowedHeaders   []string      `yaml:"allowed_headers"`
+	AllowCredentials bool          `yaml:"allow_credentials"`
+	MaxAge           time.Duration `yaml:"max_age"`
 }
 
 // GRPCServer contains gRPC server configuration.
@@ -33,10 +44,14 @@ type GRPCServer struct {
 
 // Postgres contains PostgreSQL configuration.
 type Postgres struct {
-	DSN            string        `yaml:"dsn"`
-	MaxRetries     int           `yaml:"max_retries" env-default:"10"`
-	RetryInterval  time.Duration `yaml:"retry_interval" env-default:"5s"`
-	ConnectTimeout time.Duration `yaml:"connect_timeout" env-default:"30s"`
+	DSN             string        `yaml:"dsn"`
+	MaxRetries      int           `yaml:"max_retries" env-default:"10"`
+	RetryInterval   time.Duration `yaml:"retry_interval" env-default:"5s"`
+	ConnectTimeout  time.Duration `yaml:"connect_timeout" env-default:"30s"`
+	MaxOpenConns    int           `yaml:"max_open_conns" env-default:"25"`
+	MaxIdleConns    int           `yaml:"max_idle_conns" env-default:"25"`
+	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime" env-default:"5m"`
+	ConnMaxIdleTime time.Duration `yaml:"conn_max_idle_time" env-default:"5m"`
 }
 
 // Redis contains Redis configuration.
