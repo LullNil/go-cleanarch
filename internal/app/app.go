@@ -3,13 +3,13 @@ package app
 import (
 	"context"
 	"log/slog"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/LullNil/go-cleanarch/config"
+	httpserver "github.com/LullNil/go-cleanarch/internal/delivery/http"
 	"github.com/LullNil/go-cleanarch/internal/lib/logger"
 )
 
@@ -17,7 +17,7 @@ type App struct {
 	log      *slog.Logger
 	modules  *Modules
 	services *Services
-	server   *http.Server
+	server   *httpserver.Server
 }
 
 // Run is the entrypoint of the application.
@@ -44,13 +44,7 @@ func newApp(cfg *config.Config) (*App, error) {
 	services := initServices(modules)
 
 	// HTTP server
-	router := initRouter(log, services)
-	server := &http.Server{
-		Addr:         cfg.HTTPServer.Port,
-		Handler:      router,
-		ReadTimeout:  cfg.HTTPServer.ReadTimeout,
-		WriteTimeout: cfg.HTTPServer.WriteTimeout,
-	}
+	server := httpserver.NewServer(cfg.HTTPServer, log, services.Entity1)
 
 	return &App{
 		log:      log,
@@ -67,9 +61,9 @@ func (a *App) run() error {
 
 	errCh := make(chan error, 1)
 
+	// Start the HTTP server
 	go func() {
-		a.log.Info("starting http server", slog.String("addr", a.server.Addr))
-		if err := a.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := a.server.Run(); err != nil {
 			errCh <- err
 		}
 	}()

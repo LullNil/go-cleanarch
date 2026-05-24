@@ -27,9 +27,9 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 │       ├── entity.go       # Business entity
 │       └── repository.go   # Repository port for this domain
 ├── internal
-│   ├── app                 # Composition root, modules, router
+│   ├── app                 # Composition root and lifecycle orchestration
 │   ├── delivery
-│   │   └── http            # HTTP handlers and transport DTOs
+│   │   └── http            # HTTP server, handlers, routes, transport DTOs
 │   ├── lib                 # Shared internal helpers
 │   ├── repository          # Infrastructure adapters
 │   └── service             # Use cases / application services
@@ -103,8 +103,10 @@ DELETE /v1/entity1/{id}
 ## Notes
 
 - Keep domain packages focused on entities, domain-specific errors, and repository ports.
-- Keep transport DTOs in delivery adapters such as `internal/delivery/http`.
+- Keep handlers focused on transport-level work: decode input, read path/query params, call services, and map domain errors to protocol responses.
+- Keep transport DTOs in delivery adapters such as `internal/delivery/http`; map responses through explicit DTO structs.
 - Prefer concrete services and define small consumer-side interfaces where adapters need them.
+- Keep `internal/app/services.go` limited to use case service wiring; external clients belong in `modules.go`, and technical providers can be split out when they appear.
 - Add new infrastructure implementations under `internal/repository/<driver>`.
 
 ## License

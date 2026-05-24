@@ -43,7 +43,7 @@ func (r *entity1Repo) Save(ctx context.Context, e *entity1.Entity1) (int64, erro
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" { // unique_violation
-				return 0, domain.ErrConflict
+				return 0, domain.ErrAlreadyExists
 			}
 		}
 		return 0, fmt.Errorf("%s: %w", op, err)
