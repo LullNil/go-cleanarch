@@ -51,6 +51,12 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 
 ## Configuration
 
+Create a local config from the example:
+
+```bash
+cp config/local.example.yaml config/local.yaml
+```
+
 Local config lives in `config/local.yaml`:
 
 ```yaml
