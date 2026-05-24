@@ -21,7 +21,7 @@ type Server struct {
 
 // NewServer creates a new HTTP server.
 func NewServer(cfg config.HTTPServer, log *slog.Logger, entity1Service entity1http.Service) *Server {
-	router := newRouter(log, entity1Service)
+	router := newRouter(cfg, log, entity1Service)
 
 	return &Server{
 		log: log,
@@ -50,7 +50,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 // newRouter creates a new HTTP router
-func newRouter(log *slog.Logger, entity1Service entity1http.Service) stdhttp.Handler {
+func newRouter(cfg config.HTTPServer, log *slog.Logger, entity1Service entity1http.Service) stdhttp.Handler {
 	r := chi.NewRouter()
 	r.Use(chimiddleware.RequestID)
 	r.Use(chimiddleware.RealIP)
@@ -82,6 +82,10 @@ func newRouter(log *slog.Logger, entity1Service entity1http.Service) stdhttp.Han
 			r.Delete("/{id}", entity1Handler.DeleteEntity1)
 		})
 	})
+
+	if cfg.EnableSwagger {
+		registerSwaggerRoutes(r)
+	}
 
 	return r
 }

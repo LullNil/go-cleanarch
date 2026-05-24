@@ -20,9 +20,10 @@ type Config struct {
 
 // HTTPServer contains HTTP server configuration.
 type HTTPServer struct {
-	Port         string        `yaml:"port" env-default:":8080"`
-	ReadTimeout  time.Duration `yaml:"read_timeout"`
-	WriteTimeout time.Duration `yaml:"write_timeout"`
+	Port          string        `yaml:"port" env-default:":8080"`
+	ReadTimeout   time.Duration `yaml:"read_timeout"`
+	WriteTimeout  time.Duration `yaml:"write_timeout"`
+	EnableSwagger bool          `yaml:"enable_swagger"`
 }
 
 // GRPCServer contains gRPC server configuration.

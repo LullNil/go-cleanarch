@@ -66,6 +66,7 @@ http_server:
   port: ":8080"
   read_timeout: 30s
   write_timeout: 30s
+  enable_swagger: true
 
 grpc_server:
   port: ":9090"
@@ -120,6 +121,13 @@ POST   /v1/entity1
 GET    /v1/entity1/{id}
 PUT    /v1/entity1/{id}
 DELETE /v1/entity1/{id}
+```
+
+Swagger UI is available locally when `http_server.enable_swagger` is `true`:
+
+```text
+GET /swagger
+GET /swagger/openapi.yaml
 ```
 
 ## gRPC

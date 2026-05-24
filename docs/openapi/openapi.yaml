@@ -1,0 +1,175 @@
+openapi: 3.0.3
+info:
+  title: Go Clean Architecture Template API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /v1/entity1:
+    post:
+      summary: Create entity1
+      operationId: createEntity1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEntity1Request"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateEntity1Response"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /v1/entity1/{id}:
+    get:
+      summary: Get entity1 details
+      operationId: getEntity1Details
+      parameters:
+        - $ref: "#/components/parameters/Entity1ID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entity1"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: Update entity1
+      operationId: updateEntity1
+      parameters:
+        - $ref: "#/components/parameters/Entity1ID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEntity1Request"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete entity1
+      operationId: deleteEntity1
+      parameters:
+        - $ref: "#/components/parameters/Entity1ID"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  parameters:
+    Entity1ID:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+  schemas:
+    CreateEntity1Request:
+      type: object
+      required:
+        - field3
+      properties:
+        field1:
+          type: boolean
+        field2:
+          type: integer
+          format: int64
+        field3:
+          type: string
+    CreateEntity1Response:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+    UpdateEntity1Request:
+      type: object
+      required:
+        - field3
+      properties:
+        field3:
+          type: string
+    Entity1:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        field1:
+          type: boolean
+        field2:
+          type: integer
+          format: int64
+        field3:
+          type: string
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
