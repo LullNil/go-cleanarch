@@ -15,6 +15,17 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 - Versioned REST routes under `/v1`.
 - Taskfile for local development.
 
+## Stack
+
+- Go 1.25+
+- HTTP: standard `net/http`, Chi router, CORS middleware
+- gRPC: `google.golang.org/grpc`, protobuf contracts under `docs/proto`
+- Database: PostgreSQL with SQL migrations
+- Cache: Redis via `github.com/redis/go-redis/v9`
+- Config: YAML via `cleanenv`, optional `.env` for `CONFIG_PATH`
+- Logging: standard `log/slog`
+- API docs: static OpenAPI spec and Swagger UI
+
 ## Structure
 
 ```text
@@ -38,7 +49,7 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 │   ├── repository          # Infrastructure adapters
 │   └── service             # Use cases / application services
 ├── migrations
-├── docker-compose.yml
+├── docker-compose.yml      # Local PostgreSQL and Redis
 ├── go.mod
 └── Taskfile.yaml
 ```
@@ -136,6 +147,23 @@ The versioned protobuf contract lives in `docs/proto/v1/entity1.proto`.
 
 Generated Go bindings are placed under `internal/delivery/grpc/pb` and are used only by the gRPC delivery adapter.
 
+Generate protobuf and gRPC bindings with Taskfile:
+
+```bash
+task proto:gen
+```
+
+Or run `protoc` directly:
+
+```bash
+PATH="$HOME/go/bin:$PATH" protoc \
+  --go_out=. --go_opt=module=github.com/LullNil/go-cleanarch \
+  --go-grpc_out=. --go-grpc_opt=module=github.com/LullNil/go-cleanarch \
+  docs/proto/v1/entity1.proto
+```
+
+The app starts both HTTP and gRPC servers from the same composition root.
+
 ## Notes
 
 - Keep domain packages focused on entities, domain-specific errors, and repository ports.
@@ -146,6 +174,7 @@ Generated Go bindings are placed under `internal/delivery/grpc/pb` and are used 
 - Keep `internal/app/services.go` limited to use case service wiring; external clients belong in `modules.go`, and technical providers can be split out when they appear.
 - Keep cache ports in the service package and cache adapters under `internal/repository/<driver>`.
 - Add new infrastructure implementations under `internal/repository/<driver>`.
+- The `entity1` CRUD example is intentionally abstract. Replace it with real business entities instead of building new services around the placeholder name.
 
 ## License
 
