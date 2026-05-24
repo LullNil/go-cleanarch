@@ -196,6 +196,7 @@ The app starts both HTTP and gRPC servers from the same composition root.
 - Keep cache ports in the service package and cache adapters under `internal/repository/<driver>`.
 - Add new infrastructure implementations under `internal/repository/<driver>`.
 - The `entity1` CRUD example is intentionally abstract. Replace it with real business entities instead of building new services around the placeholder name.
+- Service unit tests use small hand-written fakes to show how business logic can be tested without infrastructure.
 
 ## License
 

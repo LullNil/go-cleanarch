@@ -111,3 +111,10 @@ If dependencies changed, run:
 ```bash
 go mod tidy
 ```
+
+## Tests
+
+- Prefer unit tests for service/use case behavior.
+- Keep small hand-written fakes in `fake_test.go` next to the tested package.
+- Keep test cases in `service_test.go` or another focused `*_test.go` file.
+- Use generated mocks only when interfaces become too large for readable fakes.
