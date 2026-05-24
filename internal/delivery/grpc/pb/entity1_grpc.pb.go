@@ -205,5 +205,5 @@ var Entity1Service_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/proto/v1/entity1.proto",
+	Metadata: "docs/proto/v1/entity1.proto",
 }

@@ -2,7 +2,9 @@ package entity1
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/LullNil/go-cleanarch/domain"
@@ -11,12 +13,16 @@ import (
 
 // Service implements entity1 use cases.
 type Service struct {
-	repo domainentity1.Repository
+	repo  domainentity1.Repository
+	cache Cache
 }
 
 // New creates a new entity1 service.
-func New(repo domainentity1.Repository) *Service {
-	return &Service{repo: repo}
+func New(repo domainentity1.Repository, cache Cache) *Service {
+	return &Service{
+		repo:  repo,
+		cache: cache,
+	}
 }
 
 // CreateEntity1 creates a new entity1.
@@ -37,6 +43,9 @@ func (s *Service) CreateEntity1(ctx context.Context, cmd *CreateCommand) (int64,
 	if err != nil {
 		return 0, fmt.Errorf("%s: failed to create entity1: %w", op, err)
 	}
+
+	e.ID = id
+	s.setCache(ctx, e)
 
 	return id, nil
 }
@@ -59,6 +68,8 @@ func (s *Service) UpdateEntity1(ctx context.Context, cmd *UpdateCommand) error {
 		return fmt.Errorf("%s: failed to update entity1: %w", op, err)
 	}
 
+	s.setCache(ctx, e)
+
 	return nil
 }
 
@@ -70,7 +81,24 @@ func (s *Service) GetEntity1Details(ctx context.Context, id int64) (*domainentit
 		return nil, fmt.Errorf("%s: %w", op, domain.ErrInvalidInput)
 	}
 
-	return s.repo.GetByID(ctx, id)
+	if s.cache != nil {
+		e, err := s.cache.Get(ctx, id)
+		if err == nil {
+			return e, nil
+		}
+		if err != nil && !errors.Is(err, domain.ErrNotFound) {
+			slog.WarnContext(ctx, "failed to get entity1 from cache", "error", err, "id", id)
+		}
+	}
+
+	e, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	s.setCache(ctx, e)
+
+	return e, nil
 }
 
 // DeleteEntity1 deletes an entity1.
@@ -85,5 +113,21 @@ func (s *Service) DeleteEntity1(ctx context.Context, id int64) error {
 		return fmt.Errorf("%s: failed to delete entity1: %w", op, err)
 	}
 
+	if s.cache != nil {
+		if err := s.cache.Delete(ctx, id); err != nil {
+			slog.WarnContext(ctx, "failed to delete entity1 from cache", "error", err, "id", id)
+		}
+	}
+
 	return nil
+}
+
+func (s *Service) setCache(ctx context.Context, e *domainentity1.Entity1) {
+	if s.cache == nil {
+		return
+	}
+
+	if err := s.cache.Set(ctx, e); err != nil {
+		slog.WarnContext(ctx, "failed to set entity1 cache", "error", err, "id", e.ID)
+	}
 }

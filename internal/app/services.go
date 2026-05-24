@@ -1,7 +1,9 @@
 package app
 
 import (
+	"github.com/LullNil/go-cleanarch/config"
 	entity1repo "github.com/LullNil/go-cleanarch/internal/repository/postgres"
+	entity1cache "github.com/LullNil/go-cleanarch/internal/repository/redis"
 	entity1service "github.com/LullNil/go-cleanarch/internal/service/entity1"
 )
 
@@ -11,12 +13,13 @@ type Services struct {
 }
 
 // initServices initializes all services.
-func initServices(m *Modules) *Services {
+func initServices(cfg *config.Config, m *Modules) *Services {
 	// Init repositories
 	entity1Repo := entity1repo.NewEntity1Repository(m.DB)
+	entity1Cache := entity1cache.NewEntity1Cache(m.Redis, cfg.Redis.TTL)
 
 	// Init services
-	entity1Svc := entity1service.New(entity1Repo)
+	entity1Svc := entity1service.New(entity1Repo, entity1Cache)
 
 	return &Services{
 		Entity1: entity1Svc,

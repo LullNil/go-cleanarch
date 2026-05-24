@@ -7,12 +7,15 @@ import (
 
 	"github.com/LullNil/go-cleanarch/config"
 	"github.com/LullNil/go-cleanarch/internal/repository/postgres"
+	redisrepo "github.com/LullNil/go-cleanarch/internal/repository/redis"
+
+	goredis "github.com/redis/go-redis/v9"
 )
 
 // Modules contains external resources used by the application.
 type Modules struct {
-	DB *sql.DB
-	// Redis *redis.Client
+	DB    *sql.DB
+	Redis *goredis.Client
 	// Kafka *kafka.Writer
 	// Metrics *prometheus.Registry
 }
@@ -26,13 +29,17 @@ func initModules(cfg *config.Config, log *slog.Logger) (*Modules, error) {
 		return nil, err
 	}
 
-	// redisClient := redis.NewClient(...)
+	redisClient, err := redisrepo.ConnectWithRetries(context.Background(), cfg.Redis, log)
+	if err != nil {
+		return nil, err
+	}
+
 	// kafkaWriter := kafka.NewWriter(...)
 	// metrics := prometheus.NewRegistry()
 
 	return &Modules{
-		DB: db,
-		// Redis: redisClient,
+		DB:    db,
+		Redis: redisClient,
 		// Kafka: kafkaWriter,
 		// Metrics: metrics,
 	}, nil
@@ -44,6 +51,9 @@ func (m *Modules) Close(log *slog.Logger) {
 		log.Debug("closing postgres connection...")
 		_ = m.DB.Close()
 	}
-	// if m.Redis != nil { m.Redis.Close() }
+	if m.Redis != nil {
+		log.Debug("closing redis connection...")
+		_ = m.Redis.Close()
+	}
 	// if m.Kafka != nil { m.Kafka.Close() }
 }

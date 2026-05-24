@@ -13,3 +13,12 @@ postgres:
   max_retries: 10
   retry_interval: 5s
   connect_timeout: 30s
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+  ttl: 5m
+  max_retries: 10
+  retry_interval: 5s
+  connect_timeout: 30s

@@ -44,7 +44,7 @@ func newApp(cfg *config.Config) (*App, error) {
 	}
 
 	// Services
-	services := initServices(modules)
+	services := initServices(cfg, modules)
 
 	httpServer := httpserver.NewServer(cfg.HTTPServer, log, services.Entity1)
 	grpcServer := grpcserver.NewServer(cfg.GRPCServer, log, services.Entity1)

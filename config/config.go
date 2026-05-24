@@ -15,6 +15,7 @@ type Config struct {
 	HTTPServer HTTPServer `yaml:"http_server"`
 	GRPCServer GRPCServer `yaml:"grpc_server"`
 	Postgres   Postgres   `yaml:"postgres"`
+	Redis      Redis      `yaml:"redis"`
 }
 
 // HTTPServer contains HTTP server configuration.
@@ -32,6 +33,17 @@ type GRPCServer struct {
 // Postgres contains PostgreSQL configuration.
 type Postgres struct {
 	DSN            string        `yaml:"dsn"`
+	MaxRetries     int           `yaml:"max_retries" env-default:"10"`
+	RetryInterval  time.Duration `yaml:"retry_interval" env-default:"5s"`
+	ConnectTimeout time.Duration `yaml:"connect_timeout" env-default:"30s"`
+}
+
+// Redis contains Redis configuration.
+type Redis struct {
+	Addr           string        `yaml:"addr" env-default:"localhost:6379"`
+	Password       string        `yaml:"password"`
+	DB             int           `yaml:"db"`
+	TTL            time.Duration `yaml:"ttl" env-default:"5m"`
 	MaxRetries     int           `yaml:"max_retries" env-default:"10"`
 	RetryInterval  time.Duration `yaml:"retry_interval" env-default:"5s"`
 	ConnectTimeout time.Duration `yaml:"connect_timeout" env-default:"30s"`

@@ -9,7 +9,7 @@ Keep changes small, explicit, and consistent with the existing package boundarie
 - `internal/service/` contains use cases and application commands.
 - `internal/delivery/http/` contains HTTP servers, handlers, routes, transport DTOs, and HTTP error mapping.
 - `internal/delivery/grpc/` contains gRPC servers, handlers, generated protobuf code, and gRPC error mapping.
-- `internal/repository/<driver>/` contains infrastructure adapters that implement domain repository ports.
+- `internal/repository/<driver>/` contains infrastructure adapters that implement domain repository ports or service cache ports.
 - `internal/app/` is the composition root and lifecycle orchestrator. Do not put routes or transport-specific logic there.
 - `internal/lib/` contains reusable technical helpers that do not know business rules.
 
@@ -31,12 +31,13 @@ For a new entity or feature:
 2. Add repository ports under `domain/<entity>/repository.go` when persistence is needed.
 3. Add use case commands under `internal/service/<entity>/command.go`.
 4. Add use case methods in `internal/service/<entity>/service.go`.
-5. Add repository implementation under `internal/repository/<driver>/`.
-6. Wire the repository and service in `internal/app/services.go`.
-7. Add delivery handlers:
+5. Add cache ports under `internal/service/<entity>/cache.go` when cache is needed.
+6. Add repository/cache implementation under `internal/repository/<driver>/`.
+7. Wire repositories, caches, and services in `internal/app/services.go`.
+8. Add delivery handlers:
    - HTTP DTOs and handlers under `internal/delivery/http/<entity>/`.
-   - gRPC contract under `api/proto/v1/` and handler under `internal/delivery/grpc/<entity>/`.
-8. Register routes/services in the relevant delivery server package.
+   - gRPC contract under `docs/proto/v1/` and handler under `internal/delivery/grpc/<entity>/`.
+9. Register routes/services in the relevant delivery server package.
 
 Handlers should only do transport-level work: decode input, read path/query params or metadata, call services, and map application errors to protocol responses.
 
@@ -55,6 +56,7 @@ Handlers should only do transport-level work: decode input, read path/query para
 - gRPC error mapping lives in `internal/delivery/grpc/grpcerror`.
 - Repositories should translate known infrastructure errors into domain errors and return unknown errors wrapped with context.
 - Log errors once at the delivery boundary. Avoid duplicate logging in repository and service layers.
+- Best-effort cache failures may be logged in services only when the error is intentionally swallowed.
 
 ## Logging
 
@@ -82,7 +84,7 @@ gRPC error logs should include:
 
 ## gRPC Generation
 
-Proto contracts live under `api/proto/v1/`.
+Proto contracts live under `docs/proto/v1/`.
 
 Generated Go code goes under `internal/delivery/grpc/pb`.
 
@@ -92,7 +94,7 @@ Use:
 PATH="$HOME/go/bin:$PATH" protoc \
   --go_out=. --go_opt=module=github.com/LullNil/go-cleanarch \
   --go-grpc_out=. --go-grpc_opt=module=github.com/LullNil/go-cleanarch \
-  api/proto/v1/entity1.proto
+  docs/proto/v1/entity1.proto
 ```
 
 ## Verification
