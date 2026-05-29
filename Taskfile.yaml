@@ -55,7 +55,7 @@ tasks:
   docker:build:
     desc: "Build the application Docker image"
     cmds:
-      - docker build -t go-cleanarch:local .
+      - docker build -t {{.IMAGE | default "go-cleanarch:local"}} .
 
   ci:
     desc: "Run local CI checks"

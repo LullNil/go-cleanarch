@@ -27,22 +27,11 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Check formatting
-        run: |
-          files="$(gofmt -l .)"
-          if [ -n "$files" ]; then
-            echo "The following Go files are not formatted:"
-            echo "$files"
-            exit 1
-          fi
+      - name: Set up Task
+        uses: arduino/setup-task@v2
 
-      - name: Run tests
-        run: go test ./...
-
-      - name: Check go mod tidy
-        run: |
-          go mod tidy
-          git diff --exit-code -- go.mod go.sum
+      - name: Run CI checks
+        run: task ci
 
       - name: Build Docker image
-        run: docker build -t go-cleanarch:ci .
+        run: task docker:build IMAGE=go-cleanarch:ci

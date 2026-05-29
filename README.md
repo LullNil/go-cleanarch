@@ -241,21 +241,24 @@ Leave `integrations.auth.grpc_target` empty to disable the example client. When 
 
 ## CI
 
-GitHub Actions runs the default Go quality gate on pushes to `main` and on pull requests:
+CI provider files are intentionally thin. The reusable checks live in `Taskfile.yaml` so GitHub Actions, GitLab CI, and local runs use the same commands.
+
+GitHub Actions is enabled by default in `.github/workflows/ci.yml`. It runs on pushes to `main` and on pull requests:
 
 ```text
-gofmt check
-go test ./...
-go mod tidy check
-Docker image build
+task ci
+task docker:build
 ```
 
-The workflow lives in `.github/workflows/ci.yml` and uses `go.mod` as the source of truth for the Go version.
+The workflow uses `go.mod` as the source of truth for the Go version.
+
+A GitLab CI template is available at `docs/ci/gitlab-ci.yml`. To enable GitLab, copy that template to `.gitlab-ci.yml` in the repository root. GitLab requires the file at the root by default, while GitHub requires active workflows under `.github/workflows`.
 
 Run the same checks locally with Taskfile:
 
 ```bash
 task ci
+task docker:build
 ```
 
 Or run the individual checks:
