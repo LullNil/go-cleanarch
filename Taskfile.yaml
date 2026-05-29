@@ -25,3 +25,36 @@ tasks:
     desc: "Generate protobuf and gRPC Go bindings"
     cmds:
       - PATH="$HOME/go/bin:$PATH" protoc --go_out=. --go_opt=module=github.com/LullNil/go-cleanarch --go-grpc_out=. --go-grpc_opt=module=github.com/LullNil/go-cleanarch docs/proto/v1/entity1.proto
+
+  fmt:
+    desc: "Format Go files"
+    cmds:
+      - gofmt -w $(find . -name '*.go' -not -path './vendor/*')
+
+  fmt:check:
+    desc: "Check Go formatting"
+    cmds:
+      - test -z "$(gofmt -l .)"
+
+  test:
+    desc: "Run Go tests"
+    cmds:
+      - go test ./...
+
+  mod:tidy:
+    desc: "Tidy Go module files"
+    cmds:
+      - go mod tidy
+
+  mod:tidy:check:
+    desc: "Check that go.mod and go.sum are tidy"
+    cmds:
+      - go mod tidy
+      - git diff --exit-code -- go.mod go.sum
+
+  ci:
+    desc: "Run local CI checks"
+    cmds:
+      - task: fmt:check
+      - task: test
+      - task: mod:tidy:check

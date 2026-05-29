@@ -14,6 +14,7 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 - Redis cache example wired into the entity service.
 - Versioned REST routes under `/v1`.
 - Taskfile for local development.
+- GitHub Actions CI for formatting, tests, and module tidy checks.
 
 ## Stack
 
@@ -35,6 +36,7 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 │   └── migrator            # Database migration CLI
 ├── config                  # Configuration loading and local config
 ├── docs                    # OpenAPI and protobuf contracts
+├── .github/workflows       # CI workflows
 ├── domain
 │   ├── errors.go           # Shared domain errors
 │   └── entity1
@@ -184,6 +186,34 @@ PATH="$HOME/go/bin:$PATH" protoc \
 ```
 
 The app starts both HTTP and gRPC servers from the same composition root.
+
+## CI
+
+GitHub Actions runs the default Go quality gate on pushes to `main` and on pull requests:
+
+```text
+gofmt check
+go test ./...
+go mod tidy check
+```
+
+The workflow lives in `.github/workflows/ci.yml` and uses `go.mod` as the source of truth for the Go version.
+
+Run the same checks locally with Taskfile:
+
+```bash
+task ci
+```
+
+Or run the individual checks:
+
+```bash
+task fmt:check
+task test
+task mod:tidy:check
+```
+
+Add future checks as separate Taskfile tasks and independent CI steps so each failure remains easy to diagnose.
 
 ## Notes
 

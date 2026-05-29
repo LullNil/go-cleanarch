@@ -86,7 +86,7 @@ func (s *Service) GetEntity1Details(ctx context.Context, id int64) (*domainentit
 		if err == nil {
 			return e, nil
 		}
-		if err != nil && !errors.Is(err, domain.ErrNotFound) {
+		if !errors.Is(err, domain.ErrNotFound) {
 			slog.WarnContext(ctx, "failed to get entity1 from cache", "error", err, "id", id)
 		}
 	}
