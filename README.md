@@ -88,61 +88,7 @@ Create a local config from the example:
 cp config/local.example.yaml config/local.yaml
 ```
 
-Local config lives in `config/local.yaml`:
-
-```yaml
-env: "local"
-shutdown_timeout: 10s
-
-http_server:
-  port: ":8080"
-  read_timeout: 30s
-  write_timeout: 30s
-  enable_swagger: true
-  cors:
-    allowed_origins:
-      - "http://localhost:3000"
-      - "http://localhost:5173"
-    allowed_methods:
-      - "GET"
-      - "POST"
-      - "PUT"
-      - "PATCH"
-      - "DELETE"
-      - "OPTIONS"
-    allowed_headers:
-      - "Content-Type"
-      - "Authorization"
-    allow_credentials: true
-    max_age: 5m
-
-grpc_server:
-  port: ":9090"
-
-postgres:
-  dsn: "postgres://user:password123@localhost:5437/dbname?sslmode=disable"
-  max_retries: 10
-  retry_interval: 5s
-  connect_timeout: 30s
-  max_open_conns: 25
-  max_idle_conns: 25
-  conn_max_lifetime: 5m
-  conn_max_idle_time: 5m
-
-redis:
-  addr: "localhost:6379"
-  password: ""
-  db: 0
-  ttl: 5m
-  max_retries: 10
-  retry_interval: 5s
-  connect_timeout: 30s
-
-integrations:
-  auth:
-    grpc_target: ""
-    request_timeout: 2s
-```
+Local config lives in `config/local.yaml`
 
 You can pass a custom config path with:
 
