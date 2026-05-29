@@ -20,7 +20,7 @@ type Modules struct {
 	// Metrics *prometheus.Registry
 }
 
-// initModules initializes all external resources.
+// initModules initializes all external resources
 func initModules(cfg *config.Config, log *slog.Logger) (*Modules, error) {
 	log.Info("connecting external modules...")
 
@@ -31,6 +31,7 @@ func initModules(cfg *config.Config, log *slog.Logger) (*Modules, error) {
 
 	redisClient, err := redisrepo.ConnectWithRetries(context.Background(), cfg.Redis, log)
 	if err != nil {
+		_ = db.Close()
 		return nil, err
 	}
 

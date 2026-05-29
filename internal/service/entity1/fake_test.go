@@ -87,6 +87,17 @@ type fakeCache struct {
 	deleteCalls int
 }
 
+type fakeAuthClient struct {
+	allowed bool
+	err     error
+	calls   int
+}
+
+func (c *fakeAuthClient) CanAccessEntity1(_ context.Context, _ string, _ int64) (bool, error) {
+	c.calls++
+	return c.allowed, c.err
+}
+
 func newFakeCache(items ...*domainentity1.Entity1) *fakeCache {
 	cache := &fakeCache{
 		items: make(map[int64]*domainentity1.Entity1),

@@ -12,3 +12,9 @@ type UpdateCommand struct {
 	ID     int64
 	Field3 string
 }
+
+// AccessCommand contains data for checking entity1 access.
+type AccessCommand struct {
+	SubjectID string
+	Entity1ID int64
+}

@@ -17,6 +17,7 @@ type Config struct {
 	GRPCServer      GRPCServer    `yaml:"grpc_server"`
 	Postgres        Postgres      `yaml:"postgres"`
 	Redis           Redis         `yaml:"redis"`
+	Integrations    Integrations  `yaml:"integrations"`
 }
 
 // HTTPServer contains HTTP server configuration.
@@ -63,6 +64,17 @@ type Redis struct {
 	MaxRetries     int           `yaml:"max_retries" env-default:"10"`
 	RetryInterval  time.Duration `yaml:"retry_interval" env-default:"5s"`
 	ConnectTimeout time.Duration `yaml:"connect_timeout" env-default:"30s"`
+}
+
+// Integrations contains external service client configuration.
+type Integrations struct {
+	Auth AuthIntegration `yaml:"auth"`
+}
+
+// AuthIntegration contains external auth service client configuration.
+type AuthIntegration struct {
+	GRPCTarget     string        `yaml:"grpc_target"`
+	RequestTimeout time.Duration `yaml:"request_timeout" env-default:"2s"`
 }
 
 // New returns a new config.

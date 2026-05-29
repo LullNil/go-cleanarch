@@ -15,6 +15,8 @@ func StatusCode(err error) int {
 		return http.StatusNotFound
 	case apperr.CodeAlreadyExists:
 		return http.StatusConflict
+	case apperr.CodePermissionDenied:
+		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}

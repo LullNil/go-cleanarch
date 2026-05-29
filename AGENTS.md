@@ -10,6 +10,7 @@ Keep changes small, explicit, and consistent with the existing package boundarie
 - `internal/delivery/http/` contains HTTP servers, handlers, routes, transport DTOs, and HTTP error mapping.
 - `internal/delivery/grpc/` contains gRPC servers, handlers, generated protobuf code, and gRPC error mapping.
 - `internal/repository/<driver>/` contains infrastructure adapters that implement domain repository ports or service cache ports.
+- `internal/integration/<service>/` contains external service clients that implement service-owned ports.
 - `internal/app/` is the composition root and lifecycle orchestrator. Do not put routes or transport-specific logic there.
 - `internal/lib/` contains reusable technical helpers that do not know business rules.
 
@@ -18,7 +19,8 @@ Dependencies must point inward:
 ```text
 delivery -> service -> domain
 repository -> domain
-app -> delivery/service/repository
+integration -> domain
+app -> delivery/service/repository/integration
 ```
 
 `domain` must not import `internal`.
@@ -32,12 +34,16 @@ For a new entity or feature:
 3. Add use case commands under `internal/service/<entity>/command.go`.
 4. Add use case methods in `internal/service/<entity>/service.go`.
 5. Add cache ports under `internal/service/<entity>/cache.go` when cache is needed.
-6. Add repository/cache implementation under `internal/repository/<driver>/`.
-7. Wire repositories, caches, and services in `internal/app/services.go`.
-8. Add delivery handlers:
+6. Add external service ports under `internal/service/<entity>/` when outside calls are needed.
+7. Add repository/cache implementation under `internal/repository/<driver>/`.
+8. Add external client implementations under `internal/integration/<service>/`.
+9. Wire technical resources in `internal/app/modules.go`.
+10. Wire external clients in `internal/app/integrations.go`.
+11. Wire repositories, caches, integrations, and services in `internal/app/services.go`.
+12. Add delivery handlers:
    - HTTP DTOs and handlers under `internal/delivery/http/<entity>/`.
    - gRPC contract under `docs/proto/v1/` and handler under `internal/delivery/grpc/<entity>/`.
-9. Register routes/services in the relevant delivery server package.
+13. Register routes/services in the relevant delivery server package.
 
 Handlers should only do transport-level work: decode input, read path/query params or metadata, call services, and map application errors to protocol responses.
 
@@ -47,6 +53,7 @@ Handlers should only do transport-level work: decode input, read path/query para
 - gRPC request/response types come from generated protobuf code in `internal/delivery/grpc/pb`.
 - Service input types are commands, not DTOs, and live in `internal/service/<entity>/command.go`.
 - Do not import HTTP DTOs into services or gRPC handlers.
+- Do not import generated protobuf or concrete gRPC clients into services; services depend on small interfaces they own.
 
 ## Errors
 

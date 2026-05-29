@@ -6,3 +6,5 @@ Project documentation lives here.
 - `proto/` contains versioned gRPC protobuf contracts.
 
 CI is defined in `.github/workflows/ci.yml` and checks Go formatting, `go test ./...`, `go mod tidy`, and Docker image builds.
+
+External integration clients live under `internal/integration/<service>` and should implement service-owned interfaces.

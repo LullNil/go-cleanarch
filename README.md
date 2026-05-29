@@ -12,6 +12,7 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 - gRPC example with versioned protobuf contracts.
 - PostgreSQL repository example with migrations.
 - Redis cache example wired into the entity service.
+- Replaceable external integration client example under `internal/integration`.
 - Versioned REST routes under `/v1`.
 - Taskfile for local development.
 - GitHub Actions CI for formatting, tests, and module tidy checks.
@@ -47,6 +48,7 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 │   ├── delivery
 │   │   ├── grpc            # gRPC server, handlers, generated pb code
 │   │   └── http            # HTTP server, handlers, routes, transport DTOs
+│   ├── integration         # External service clients
 │   ├── lib                 # Shared internal helpers
 │   ├── repository          # Infrastructure adapters
 │   └── service             # Use cases / application services
@@ -120,6 +122,11 @@ redis:
   max_retries: 10
   retry_interval: 5s
   connect_timeout: 30s
+
+integrations:
+  auth:
+    grpc_target: ""
+    request_timeout: 2s
 ```
 
 You can pass a custom config path with:
@@ -217,6 +224,21 @@ PATH="$HOME/go/bin:$PATH" protoc \
 
 The app starts both HTTP and gRPC servers from the same composition root.
 
+## External Integrations
+
+External service clients live under `internal/integration/<service>`.
+
+The example auth gRPC client is in `internal/integration/auth/grpc_client.go`. Application services depend on the service-owned port, not on protobuf or gRPC types:
+
+```text
+internal/service/entity1/auth.go        # AuthClient interface
+internal/integration/auth/grpc_client.go # gRPC adapter
+internal/app/integrations.go             # external client lifecycle
+internal/app/services.go                 # dependency injection
+```
+
+Leave `integrations.auth.grpc_target` empty to disable the example client. When adding a real auth contract, keep generated protobuf types inside the integration adapter and map them to the service interface.
+
 ## CI
 
 GitHub Actions runs the default Go quality gate on pushes to `main` and on pull requests:
@@ -253,8 +275,11 @@ Add future checks as separate Taskfile tasks and independent CI steps so each fa
 - Keep transport DTOs in delivery adapters such as `internal/delivery/http`; map responses through explicit DTO structs.
 - Keep protocol-specific error mapping in delivery packages and shared application error categories in `internal/apperr`.
 - Prefer concrete services and define small consumer-side interfaces where adapters need them.
-- Keep `internal/app/services.go` limited to use case service wiring; external clients belong in `modules.go`, and technical providers can be split out when they appear.
+- Keep `internal/app/modules.go` limited to low-level technical resources such as databases, caches, brokers, and metrics.
+- Keep `internal/app/integrations.go` limited to external service client lifecycle and wiring.
+- Keep `internal/app/services.go` limited to use case service wiring.
 - Keep cache ports in the service package and cache adapters under `internal/repository/<driver>`.
+- Keep external service ports in the service package and concrete clients under `internal/integration/<service>`.
 - Add new infrastructure implementations under `internal/repository/<driver>`.
 - The `entity1` CRUD example is intentionally abstract. Replace it with real business entities instead of building new services around the placeholder name.
 - Service unit tests use small hand-written fakes to show how business logic can be tested without infrastructure.

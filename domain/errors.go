@@ -11,4 +11,7 @@ var (
 
 	// ErrAlreadyExists indicates that a resource already exists.
 	ErrAlreadyExists = errors.New("already exists")
+
+	// ErrPermissionDenied indicates that an action is not allowed.
+	ErrPermissionDenied = errors.New("permission denied")
 )

@@ -15,13 +15,15 @@ import (
 type Service struct {
 	repo  domainentity1.Repository
 	cache Cache
+	auth  AuthClient
 }
 
 // New creates a new entity1 service.
-func New(repo domainentity1.Repository, cache Cache) *Service {
+func New(repo domainentity1.Repository, cache Cache, auth AuthClient) *Service {
 	return &Service{
 		repo:  repo,
 		cache: cache,
+		auth:  auth,
 	}
 }
 
@@ -99,6 +101,29 @@ func (s *Service) GetEntity1Details(ctx context.Context, id int64) (*domainentit
 	s.setCache(ctx, e)
 
 	return e, nil
+}
+
+// CheckEntity1Access checks whether a subject can access entity1.
+func (s *Service) CheckEntity1Access(ctx context.Context, cmd *AccessCommand) error {
+	const op = "service.entity1.CheckEntity1Access"
+
+	if cmd == nil || strings.TrimSpace(cmd.SubjectID) == "" || cmd.Entity1ID <= 0 {
+		return fmt.Errorf("%s: %w", op, domain.ErrInvalidInput)
+	}
+
+	if s.auth == nil {
+		return nil
+	}
+
+	allowed, err := s.auth.CanAccessEntity1(ctx, cmd.SubjectID, cmd.Entity1ID)
+	if err != nil {
+		return fmt.Errorf("%s: failed to check access: %w", op, err)
+	}
+	if !allowed {
+		return fmt.Errorf("%s: %w", op, domain.ErrPermissionDenied)
+	}
+
+	return nil
 }
 
 // DeleteEntity1 deletes an entity1.

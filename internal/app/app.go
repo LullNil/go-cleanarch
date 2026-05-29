@@ -15,12 +15,13 @@ import (
 
 // App contains application dependencies and lifecycle.
 type App struct {
-	cfg      *config.Config
-	log      *slog.Logger
-	modules  *Modules
-	services *Services
-	http     *httpserver.Server
-	grpc     *grpcserver.Server
+	cfg          *config.Config
+	log          *slog.Logger
+	modules      *Modules
+	integrations *Integrations
+	services     *Services
+	http         *httpserver.Server
+	grpc         *grpcserver.Server
 }
 
 // Run is the entrypoint of the application.
@@ -43,19 +44,27 @@ func newApp(cfg *config.Config) (*App, error) {
 		return nil, err
 	}
 
+	// External integrations
+	integrations, err := initIntegrations(cfg, modules, log)
+	if err != nil {
+		modules.Close(log)
+		return nil, err
+	}
+
 	// Services
-	services := initServices(cfg, modules)
+	services := initServices(cfg, modules, integrations)
 
 	httpServer := httpserver.NewServer(cfg.HTTPServer, log, services.Entity1)
 	grpcServer := grpcserver.NewServer(cfg.GRPCServer, log, services.Entity1)
 
 	return &App{
-		cfg:      cfg,
-		log:      log,
-		modules:  modules,
-		services: services,
-		http:     httpServer,
-		grpc:     grpcServer,
+		cfg:          cfg,
+		log:          log,
+		modules:      modules,
+		integrations: integrations,
+		services:     services,
+		http:         httpServer,
+		grpc:         grpcServer,
 	}, nil
 }
 
@@ -103,7 +112,8 @@ func (a *App) run() error {
 		a.log.Info("grpc server stopped gracefully")
 	}
 
-	// Close external modules
+	// Close external integrations and modules
+	a.integrations.Close(a.log)
 	a.modules.Close(a.log)
 
 	return nil

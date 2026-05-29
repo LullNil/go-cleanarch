@@ -44,3 +44,8 @@ redis:
   max_retries: 10
   retry_interval: 5s
   connect_timeout: 30s
+
+integrations:
+  auth:
+    grpc_target: ""
+    request_timeout: 2s

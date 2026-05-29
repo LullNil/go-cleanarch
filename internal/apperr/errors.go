@@ -20,6 +20,9 @@ const (
 	// CodeAlreadyExists indicates that a resource already exists.
 	CodeAlreadyExists Code = "already_exists"
 
+	// CodePermissionDenied indicates that the caller is not allowed to perform an action.
+	CodePermissionDenied Code = "permission_denied"
+
 	// CodeInternal indicates an unexpected error.
 	CodeInternal Code = "internal"
 )
@@ -83,6 +86,8 @@ func CodeOf(err error) Code {
 		return CodeNotFound
 	case errors.Is(err, domain.ErrAlreadyExists):
 		return CodeAlreadyExists
+	case errors.Is(err, domain.ErrPermissionDenied):
+		return CodePermissionDenied
 	default:
 		return CodeInternal
 	}
@@ -97,6 +102,8 @@ func PublicMessage(err error) string {
 		return "resource not found"
 	case CodeAlreadyExists:
 		return "resource already exists"
+	case CodePermissionDenied:
+		return "permission denied"
 	default:
 		return "internal server error"
 	}

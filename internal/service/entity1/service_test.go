@@ -12,7 +12,7 @@ import (
 func TestCreateEntity1_InvalidInput(t *testing.T) {
 	t.Parallel()
 
-	service := New(newFakeRepo(), newFakeCache())
+	service := New(newFakeRepo(), newFakeCache(), nil)
 
 	_, err := service.CreateEntity1(context.Background(), &CreateCommand{
 		Field3: " ",
@@ -33,7 +33,7 @@ func TestGetEntity1Details_CacheHitDoesNotCallRepo(t *testing.T) {
 	}
 	repo := newFakeRepo()
 	cache := newFakeCache(cached)
-	service := New(repo, cache)
+	service := New(repo, cache, nil)
 
 	got, err := service.GetEntity1Details(context.Background(), cached.ID)
 	if err != nil {
@@ -61,7 +61,7 @@ func TestGetEntity1Details_CacheMissLoadsRepoAndSetsCache(t *testing.T) {
 	}
 	repo := newFakeRepo(stored)
 	cache := newFakeCache()
-	service := New(repo, cache)
+	service := New(repo, cache, nil)
 
 	got, err := service.GetEntity1Details(context.Background(), stored.ID)
 	if err != nil {
@@ -92,7 +92,7 @@ func TestDeleteEntity1_DeletesRepoAndCache(t *testing.T) {
 	}
 	repo := newFakeRepo(stored)
 	cache := newFakeCache(stored)
-	service := New(repo, cache)
+	service := New(repo, cache, nil)
 
 	if err := service.DeleteEntity1(context.Background(), stored.ID); err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -105,5 +105,37 @@ func TestDeleteEntity1_DeletesRepoAndCache(t *testing.T) {
 	}
 	if _, ok := cache.items[stored.ID]; ok {
 		t.Fatalf("expected cache entry to be deleted")
+	}
+}
+
+func TestCheckEntity1Access_UsesAuthClient(t *testing.T) {
+	t.Parallel()
+
+	auth := &fakeAuthClient{allowed: true}
+	service := New(newFakeRepo(), newFakeCache(), auth)
+
+	err := service.CheckEntity1Access(context.Background(), &AccessCommand{
+		SubjectID: "user-1",
+		Entity1ID: 10,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if auth.calls != 1 {
+		t.Fatalf("expected auth client to be called once, got %d calls", auth.calls)
+	}
+}
+
+func TestCheckEntity1Access_Denied(t *testing.T) {
+	t.Parallel()
+
+	service := New(newFakeRepo(), newFakeCache(), &fakeAuthClient{})
+
+	err := service.CheckEntity1Access(context.Background(), &AccessCommand{
+		SubjectID: "user-1",
+		Entity1ID: 10,
+	})
+	if !errors.Is(err, domain.ErrPermissionDenied) {
+		t.Fatalf("expected ErrPermissionDenied, got %v", err)
 	}
 }

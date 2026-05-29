@@ -16,6 +16,8 @@ func Code(err error) codes.Code {
 		return codes.NotFound
 	case apperr.CodeAlreadyExists:
 		return codes.AlreadyExists
+	case apperr.CodePermissionDenied:
+		return codes.PermissionDenied
 	default:
 		return codes.Internal
 	}
