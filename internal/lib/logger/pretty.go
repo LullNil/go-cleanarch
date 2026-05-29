@@ -71,11 +71,11 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 }
 
 // WithAttrs returns a handler with additional attributes.
-func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+func (h *PrettyHandler) WithAttrs(_ []slog.Attr) slog.Handler {
 	return h // ignoring for simplicity
 }
 
 // WithGroup returns a handler with an additional group.
-func (h *PrettyHandler) WithGroup(name string) slog.Handler {
+func (h *PrettyHandler) WithGroup(_ string) slog.Handler {
 	return h // ignoring for simplicity
 }

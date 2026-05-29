@@ -1,5 +1,8 @@
 version: "3"
 
+vars:
+  GOLANGCI_LINT_VERSION: '{{.GOLANGCI_LINT_VERSION | default "latest"}}'
+
 tasks:
   migrate:
     cmds:
@@ -41,6 +44,19 @@ tasks:
     cmds:
       - go test ./...
 
+  tools:install:
+    desc: "Install development tools"
+    cmds:
+      - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{.GOLANGCI_LINT_VERSION}}
+
+  lint:
+    desc: "Run Go linters"
+    preconditions:
+      - sh: command -v golangci-lint
+        msg: 'golangci-lint is not installed or not in PATH. Run: task tools:install and add $(go env GOPATH)/bin to PATH'
+    cmds:
+      - golangci-lint run ./...
+
   mod:tidy:
     desc: "Tidy Go module files"
     cmds:
@@ -61,5 +77,6 @@ tasks:
     desc: "Run local CI checks"
     cmds:
       - task: fmt:check
+      - task: lint
       - task: test
       - task: mod:tidy:check

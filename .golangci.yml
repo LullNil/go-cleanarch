@@ -1,0 +1,44 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - errcheck
+    - errorlint
+    - govet
+    - ineffassign
+    - nilerr
+    - revive
+    - sqlclosecheck
+    - staticcheck
+    - unused
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: false
+    govet:
+      enable:
+        - shadow
+    revive:
+      confidence: 0.8
+      rules:
+        - name: exported
+        - name: errorf
+        - name: error-strings
+        - name: error-naming
+        - name: increment-decrement
+        - name: unreachable-code
+        - name: unused-parameter
+          arguments:
+            - allow-regex: "^_"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

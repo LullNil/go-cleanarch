@@ -14,7 +14,7 @@ func registerSwaggerRoutes(r chi.Router) {
 		http.ServeFile(w, r, openAPISpecPath)
 	})
 
-	r.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/swagger", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = w.Write([]byte(swaggerHTML))
 	})

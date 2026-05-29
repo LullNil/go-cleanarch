@@ -13,6 +13,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  GOLANGCI_LINT_VERSION: latest
+
 jobs:
   go:
     name: Go checks
@@ -29,6 +32,12 @@ jobs:
 
       - name: Set up Task
         uses: arduino/setup-task@v2
+
+      - name: Set up golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          install-only: true
 
       - name: Run CI checks
         run: task ci

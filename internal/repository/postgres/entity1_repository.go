@@ -41,7 +41,8 @@ func (r *entity1Repo) Save(ctx context.Context, e *entity1.Entity1) (int64, erro
 		e.Field3,
 	).Scan(&id)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
 			if pqErr.Code == "23505" { // unique_violation
 				return 0, domain.ErrAlreadyExists
 			}

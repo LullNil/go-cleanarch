@@ -63,7 +63,22 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 
 - Go 1.25+
 - Docker Engine and Docker Compose
+- golangci-lint for local linting
 - Optional: Taskfile
+
+Install local development tools:
+
+```bash
+task tools:install
+```
+
+By default this installs the latest `golangci-lint` into `$(go env GOPATH)/bin`. Make sure that directory is in your `PATH`.
+
+Pin a version when needed:
+
+```bash
+task tools:install GOLANGCI_LINT_VERSION=v2.12.2
+```
 
 ## Configuration
 
@@ -257,6 +272,7 @@ A GitLab CI template is available at `docs/ci/gitlab-ci.yml`. To enable GitLab, 
 Run the same checks locally with Taskfile:
 
 ```bash
+task tools:install
 task ci
 task docker:build
 ```
@@ -265,11 +281,12 @@ Or run the individual checks:
 
 ```bash
 task fmt:check
+task lint
 task test
 task mod:tidy:check
 ```
 
-Add future checks as separate Taskfile tasks and independent CI steps so each failure remains easy to diagnose.
+Go linting is configured in `.golangci.yml`. The default lint gate enables `govet`, `staticcheck`, `errcheck`, `revive`, and a small set of bug-focused checks. Add future checks as separate Taskfile tasks or explicit linters so each failure remains easy to diagnose.
 
 ## Notes
 

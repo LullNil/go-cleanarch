@@ -12,6 +12,7 @@ import (
 	entity1service "github.com/LullNil/go-cleanarch/internal/service/entity1"
 )
 
+// Service defines entity1 use cases required by the HTTP handler.
 type Service interface {
 	CreateEntity1(ctx context.Context, cmd *entity1service.CreateCommand) (int64, error)
 	UpdateEntity1(ctx context.Context, cmd *entity1service.UpdateCommand) error
@@ -19,6 +20,7 @@ type Service interface {
 	DeleteEntity1(ctx context.Context, id int64) error
 }
 
+// Handler handles entity1 HTTP requests.
 type Handler struct {
 	service Service
 	log     *slog.Logger
