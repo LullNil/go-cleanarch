@@ -52,6 +52,11 @@ tasks:
       - go mod tidy
       - git diff --exit-code -- go.mod go.sum
 
+  docker:build:
+    desc: "Build the application Docker image"
+    cmds:
+      - docker build -t go-cleanarch:local .
+
   ci:
     desc: "Run local CI checks"
     cmds:

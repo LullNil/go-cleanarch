@@ -1,0 +1,46 @@
+env: "local"
+shutdown_timeout: 10s
+
+http_server:
+  port: ":8080"
+  read_timeout: 30s
+  write_timeout: 30s
+  enable_swagger: true
+  cors:
+    allowed_origins:
+      - "http://localhost:3000"
+      - "http://localhost:5173"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+    allow_credentials: true
+    max_age: 5m
+
+grpc_server:
+  port: ":9090"
+
+postgres:
+  dsn: "postgres://user:password123@postgres:5432/dbname?sslmode=disable"
+  max_retries: 10
+  retry_interval: 5s
+  connect_timeout: 30s
+  max_open_conns: 25
+  max_idle_conns: 25
+  conn_max_lifetime: 5m
+  conn_max_idle_time: 5m
+
+redis:
+  addr: "redis:6379"
+  password: ""
+  db: 0
+  ttl: 5m
+  max_retries: 10
+  retry_interval: 5s
+  connect_timeout: 30s

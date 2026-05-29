@@ -51,6 +51,7 @@ It separates domain models, use cases, delivery adapters, and infrastructure ada
 │   ├── repository          # Infrastructure adapters
 │   └── service             # Use cases / application services
 ├── migrations
+├── Dockerfile
 ├── docker-compose.yml      # Local PostgreSQL and Redis
 ├── go.mod
 └── Taskfile.yaml
@@ -148,6 +149,35 @@ go run ./cmd/migrator --database-dsn "postgres://user:password123@localhost:5437
 go run ./cmd/app --config=./config/local.yaml
 ```
 
+## Docker
+
+Build the application image:
+
+```bash
+task docker:build
+```
+
+Without Taskfile:
+
+```bash
+docker build -t go-cleanarch:local .
+```
+
+Run PostgreSQL and Redis, then start the application container with the Docker example config:
+
+```bash
+docker compose up -d
+docker run --rm \
+  --network go-cleanarch_default \
+  -p 8080:8080 \
+  -p 9090:9090 \
+  -e CONFIG_PATH=/app/config/docker.yaml \
+  -v "$PWD/config/docker.example.yaml:/app/config/docker.yaml:ro" \
+  go-cleanarch:local
+```
+
+The image contains the application binary and OpenAPI assets. Runtime configuration is supplied from outside the image.
+
 ## Example Routes
 
 ```text
@@ -195,6 +225,7 @@ GitHub Actions runs the default Go quality gate on pushes to `main` and on pull 
 gofmt check
 go test ./...
 go mod tidy check
+Docker image build
 ```
 
 The workflow lives in `.github/workflows/ci.yml` and uses `go.mod` as the source of truth for the Go version.
